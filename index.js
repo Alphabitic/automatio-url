@@ -45,7 +45,8 @@ const checkUrl = async (url) => {
   }
 };
 
-
+// Définir la tâche planifiée pour s'exécuter tous les jours à 5h30
+app.get('/sendEmailUrl', (req, res) => {
 const sendEmail = async (htmlContent) => {
   const transporter = nodemailer.createTransport({
     host: 'smtp.office365.com',
@@ -240,8 +241,7 @@ function generateResultsHtml(results) {
     return html;
   }
   
-// Définir la tâche planifiée pour s'exécuter tous les jours à 5h30
-app.get('/sendEmailUrl', (req, res) => {
+
  
        checkLinksAndSendEmail();
     }
