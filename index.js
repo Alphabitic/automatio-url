@@ -242,13 +242,10 @@ function generateResultsHtml(results) {
   
 // Définir la tâche planifiée pour s'exécuter tous les jours à 5h30
 app.get('/sendEmailUrl', (req, res) => {
-    try {
-      // Vérifier les liens et envoyer un email
+ 
        checkLinksAndSendEmail();
-    } catch (error) {
-      console.error('Une erreur est survenue:', error);
     }
-  });
+  );
 
   app.listen(PORT, () => {
     console.log(`Le serveur est démarré sur le port ${PORT}`)
