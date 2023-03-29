@@ -35,14 +35,11 @@ const checkUrl = async (url) => {
   }
 
   try {
-    const response = await axios.get(url, {
-      httpsAgent: new https.Agent({ rejectUnauthorized: false })
-    });
-    const contentType = response.headers['content-type'];
+    const response = await axios.get(url);
     const status = response.status;
-
-    // Vérifier si le statut est une redirection (3xx)
-    if (status >= 300 && status < 400) {
+  
+    // Check for redirection
+    if (status === 301 || status < 400) {
       const redirectUrl = response.headers.location;
       if (!redirectUrl) {
         return {
@@ -52,10 +49,18 @@ const checkUrl = async (url) => {
       }
       return checkUrl(redirectUrl);
     }
-
+  
+    // Check if URL was successfully checked
+    if (status !== 200) {
+      return {
+        link: url,
+        status: 'failure'
+      };
+    }
+  
     return {
       link: url,
-      status: status === 200 && contentType.indexOf('text/html') !== -1 ? 'success' : 'failure'
+      status: 'success'
     };
   } catch (error) {
     console.error('Error checking url:', error);
@@ -64,6 +69,7 @@ const checkUrl = async (url) => {
       status: 'error'
     };
   }
+  
 };
 
 
