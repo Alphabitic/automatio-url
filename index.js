@@ -231,7 +231,7 @@ const checkLinksAndSendEmail = async () => {
       });
      
       console.log(results[i].status)
-      {  html += '<td style=\'border: 1px solid #ccc; padding: 10px;\'>' + (results[i].status === 'success' ? '<span style=\'color: green; font-weight: bold;\'>✔️</span>' : '<span style=\'color: red; font-weight: bold;\'>❌</span>') + '</td>';}
+      {  html += '<td style=\'border: 1px solid #ccc; padding: 10px;\'>' + (results[i].status === 'success' ? '<span style=\'color: green; font-weight: bold;\'>✔️</span>' : '<span style=\'color: red; font-weight: bold;\'>✔️</span>') + '</td>';}
 
     
     } else if (link === 'https://envoludia.neocles.com') {
