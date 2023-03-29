@@ -179,7 +179,7 @@ function generateResultsHtml(results) {
       html += '<td style=\'border: 1px solid #ccc; padding: 10px;\'><a href="' + link + '">' + link + '</a></td>';
       if (link === 'https://envoludia.neocles.com') {
         html += '<td style=\'border: 1px solid #ccc; padding: 10px;\'><span style=\'color: orange; font-weight: bold;\'>⚠️</span> Cliquez sur le lien si vous êtes sur Nomade.</td>';
-      } else if (link === 'https://mail.francemutuelle.fr/') {
+      } else if (link === ('https://mail.francemutuelle.fr/' || 'https://adapei65.neocles.com' || 'https://gieccifinance.neocles.com'  || 'https://eri.neocles.com/vpn/index_2auth.html' || 'https://proudreed.neocles.com/vpn/index.html' || 'https://sfcdc65.neocles.com')) {
         // Check if the website uses the POST method
        
         axios.get(link, {
