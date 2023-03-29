@@ -57,8 +57,8 @@ const sendEmail = async (htmlContent) => {
     }
   });
 
- const recipients = [ 'Support_Mada@neocles.com','lydia.tahinjanahary@orange.com','dimbyfaneva.randriamarovahoaka@orange.com','hedy.andriamahenina@orange.com'  ];
-//const recipients = ['zola_andria@outlook.fr'  ];
+ //const recipients = [ 'Support_Mada@neocles.com','lydia.tahinjanahary@orange.com','dimbyfaneva.randriamarovahoaka@orange.com','hedy.andriamahenina@orange.com'  ];
+const recipients = ['zola_andria@outlook.fr'  ];
   const ccRecipients = ['zolalaina.andrianantenaina@orange.com'  ];
   const bccRecipients = ['cert.helpdesk@outlook.com'];
     const mailOptions = {
