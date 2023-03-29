@@ -26,12 +26,33 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 const checkUrl = async (url) => {
+  const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/; // Expression régulière pour valider la syntaxe du lien
+  if (!urlRegex.test(url)) {
+    return {
+      link: url,
+      status: 'invalid'
+    };
+  }
+
   try {
     const response = await axios.get(url, {
       httpsAgent: new https.Agent({ rejectUnauthorized: false })
     });
     const contentType = response.headers['content-type'];
     const status = response.status;
+
+    // Vérifier si le statut est une redirection (3xx)
+    if (status >= 300 && status < 400) {
+      const redirectUrl = response.headers.location;
+      if (!redirectUrl) {
+        return {
+          link: url,
+          status: 'failure'
+        };
+      }
+      return checkUrl(redirectUrl);
+    }
+
     return {
       link: url,
       status: status === 200 && contentType.indexOf('text/html') !== -1 ? 'success' : 'failure'
@@ -44,6 +65,7 @@ const checkUrl = async (url) => {
     };
   }
 };
+
 
 // Définir la tâche planifiée pour s'exécuter tous les jours à 5h30
 app.get('/sendEmailUrl', (req, res) => {
@@ -179,7 +201,7 @@ function generateResultsHtml(results) {
       html += '<td style=\'border: 1px solid #ccc; padding: 10px;\'><a href="' + link + '">' + link + '</a></td>';
       if (link === 'https://envoludia.neocles.com') {
         html += '<td style=\'border: 1px solid #ccc; padding: 10px;\'><span style=\'color: orange; font-weight: bold;\'>⚠️</span> Cliquez sur le lien si vous êtes sur Nomade.</td>';
-      } else if (link === ('https://mail.francemutuelle.fr/' || 'https://adapei65.neocles.com' || 'https://gieccifinance.neocles.com'  || 'https://eri.neocles.com/vpn/index_2auth.html' || 'https://proudreed.neocles.com/vpn/index.html' || 'https://sfcdc65.neocles.com')) {
+      } else if (link === ('https://mail.francemutuelle.fr/' )) {
         // Check if the website uses the POST method
        
         axios.get(link, {
