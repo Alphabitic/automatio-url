@@ -1,0 +1,14 @@
+name: Run app
+on:
+  schedule:
+    - cron: '0 5 * * *'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Install dependencies
+        run: npm install
+      - name: Run app
+        run: npm start
