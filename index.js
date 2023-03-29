@@ -69,7 +69,7 @@ const checkUrl = async (url) => {
 
 
 // Définir la tâche planifiée pour s'exécuter tous les jours à 5h30
-//app.get('/sendEmailUrl', (req, res) => {
+app.get('/sendEmailUrl', (req, res) => {
 const sendEmail = async (htmlContent) => {
   const transporter = nodemailer.createTransport({
     host: 'smtp.office365.com',
@@ -246,7 +246,7 @@ const checkLinksAndSendEmail = async () => {
     html += '</tbody>';
     html += `</table>`;
     html += ` <br><strong>Checker l'état du relais de messagerie 85.233.205.2 via le lien ci-dessous:</strong> <br> <br><div>
-    <div style="background-color: #e38d13; padding: 10px; border: none; border-radius: 5px; width: auto; display: inline-block; margin: 10px auto;">
+    <div style="padding: 10px; border: none; border-radius: 5px; width: auto; display: inline-block; margin: 10px auto;">
         <a href="https://mxtoolbox.com/SuperTool.aspx?action=blacklist%3a85.233.205.2&run=toolpage" target="_blank" style="color: blue; text-decoration: none; font-weight: bold; font-size: 16px; font-family: Arial, sans-serif;">
             MXToolBox
         </a>
@@ -269,11 +269,11 @@ html += `<div style="margin-top: 30px;">`;
   }
   
 
-  cron.schedule('* * * * *', () => {
+
        checkLinksAndSendEmail();
     }
   );
-//});
+
   app.listen(PORT, () => {
     console.log(`Le serveur est démarré sur le port ${PORT}`)
   })
