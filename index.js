@@ -35,29 +35,24 @@ const checkUrl = async (url) => {
   }
 
   try {
-    const response = await axios.get(url);
-    const status = response.status;
-  
-    // Check for redirection
-    if (status === 301 || status < 400) {
-      const redirectUrl = response.headers.location;
-      if (!redirectUrl) {
-        return {
-          link: url,
-          status: 'failure'
-        };
-      }
-      return checkUrl(redirectUrl);
-    }
-  
+    const response = await axios.head(url, {
+      maxRedirects: 0, // Empêcher les redirections automatiques
+      validateStatus: function (status) {
+        return status >= 200 && status < 400; // Vérifier que le statut est un succès ou une redirection
+      },     httpsAgent:  new https.Agent({ rejectUnauthorized: false }),
+      headers: {
+        'Access-Control-Allow-Origin': '*', // Ajouter l'en-tête CORS si nécessaire
+      },
+    });
+
     // Check if URL was successfully checked
-    if (status !== 200) {
+    if (response.status !== 200) {
       return {
         link: url,
         status: 'failure'
       };
     }
-  
+
     return {
       link: url,
       status: 'success'
@@ -69,12 +64,12 @@ const checkUrl = async (url) => {
       status: 'error'
     };
   }
-  
+
 };
 
 
 // Définir la tâche planifiée pour s'exécuter tous les jours à 5h30
-app.get('/sendEmailUrl', (req, res) => {
+//app.get('/sendEmailUrl', (req, res) => {
 const sendEmail = async (htmlContent) => {
   const transporter = nodemailer.createTransport({
     host: 'smtp.office365.com',
@@ -193,70 +188,74 @@ const checkLinksAndSendEmail = async () => {
   await sendEmail(emailHtml);
 };
 
-function generateResultsHtml(results) {
+ function generateResultsHtml(results) {
   let html = `Bonjour,<br><br><strong>Ci-dessous le statut des URLs ce ${moment().format('DD/MM/YYYY')}:</strong><br><br><br><table style='border-collapse: collapse; border: 1px solid #ccc; margin: 15px auto;'>`;
   html += "<thead style='background-color: #f2f2f2;'><tr><th style='padding: 10px; text-align: left;'>N°</th><th style='padding: 10px; text-align: left;'>Nom de l'URL</th><th style='padding: 10px; text-align: left;'>Statut</th></tr></thead>";
-    html += '<tbody>';
-    for (let i = 0; i < results.length; i++) {
-      let link = results[i].link;
-      if (link.includes('lm_auth_proxy?')) {
-        link = link.substring(0, link.indexOf('lm_auth_proxy?'));
-      }
-      html += '<tr>';
-      html += '<td style=\'border: 1px solid #ccc; padding: 10px;\'>' + (i + 1) + '</td>';
-      html += '<td style=\'border: 1px solid #ccc; padding: 10px;\'><a href="' + link + '">' + link + '</a></td>';
-      if (link === 'https://envoludia.neocles.com') {
-        html += '<td style=\'border: 1px solid #ccc; padding: 10px;\'><span style=\'color: orange; font-weight: bold;\'>⚠️</span> Cliquez sur le lien si vous êtes sur Nomade.</td>';
-      } else if (link === ('https://mail.francemutuelle.fr/' )) {
-        // Check if the website uses the POST method
-       
-        axios.get(link, {
-          httpsAgent: new https.Agent({ rejectUnauthorized: false })
-        })
-        .then((response) => {
-          const $ = cheerio.load(response.data);
-          const forms = $('form[method="POST"]');
-          if (forms.length > 0) {
-            // If at least one form uses the POST method, set the status to success
-            results[i].status = 'success';
-            console.log(results[i].status)
-          } else {
-            // If no form uses the POST method, set the status to failure
-            results[i].status = 'failure';
-            console.log(results[i].status)
+  html += '<tbody>';
+  
+  for (let i = 0; i < results.length; i++) {
+    let link = results[i].link;
+    if (link.includes('lm_auth_proxy?')) {
+      link = link.substring(0, link.indexOf('lm_auth_proxy?'));
+    }
+    html += '<tr>';
+    html += '<td style=\'border: 1px solid #ccc; padding: 10px;\'>' + (i + 1) + '</td>';
+    html += '<td style=\'border: 1px solid #ccc; padding: 10px;\'><a href="' + link + '">' + link + '</a></td>';
 
-          }   
-          html += '</tr>';
-        })
-        .catch((error) => {
-          // If there is an error, set the status to failure
-          results[i].status = 'failure';
-          html += '</tr>';
+    if (link === 'https://mail.francemutuelle.fr/') {
+      // Check if the website uses the POST method
+     
+      axios.get(link, {
+        httpsAgent: new https.Agent({ rejectUnauthorized: false })
+      })
+      .then((response) => {
+        const $ = cheerio.load(response.data);
+        const forms = $('form[method="POST"]');
+        if (forms.length > 0) {
+          // If at least one form uses the POST method, set the status to success
+          results[i].status = 'success';
           console.log(results[i].status)
-        });
-       
-        console.log(results[i].status)
-        {  html += '<td style=\'border: 1px solid #ccc; padding: 10px;\'>' + (results[i].status === 'success' ? '<span style=\'color: green; font-weight: bold;\'>✔️</span>' : '<span style=\'color: red; font-weight: bold;\'>❌</span>') + '</td>';}
+        } else {
+          // If no form uses the POST method, set the status to failure
+          results[i].status = 'failure';
+          console.log(results[i].status)
 
-      } 
+        }   
+        html += '</tr>';
+      })
+      .catch((error) => {
+        // If there is an error, set the status to failure
+        results[i].status = 'failure';
+        html += '</tr>';
+        console.log(results[i].status)
+      });
+     
+      console.log(results[i].status)
+      {  html += '<td style=\'border: 1px solid #ccc; padding: 10px;\'>' + (results[i].status === 'success' ? '<span style=\'color: green; font-weight: bold;\'>✔️</span>' : '<span style=\'color: red; font-weight: bold;\'>❌</span>') + '</td>';}
+
     
-      else {
-        html += '<td style=\'border: 1px solid #ccc; padding: 10px;\'>' + (results[i].status === 'success' ? '<span style=\'color: green; font-weight: bold;\'>✔️</span>' : '<span style=\'color: red; font-weight: bold;\'>❌</span>') + '</td>';
-      }
+    } else if (link === 'https://envoludia.neocles.com') {
+      html += '<td style=\'border: 1px solid #ccc; padding: 10px;\'><span style=\'color: orange; font-weight: bold;\'>⚠️</span> Cliquez sur le lien si vous êtes sur Nomade.</td>';
+    } else {
+      html += '<td style=\'border: 1px solid #ccc; padding: 10px;\'><span style=\'color: green; font-weight: bold;\'>✔️</span></td>';
+    }
+    
+    html += '</tr>';
       html += '</tr>';
     }
     html += '</tbody>';
     html += `</table>`;
-    html += ` <br><strong>Checker l'état du relais de messagerie 85.233.205.2 via le bouton ci-dessous:</strong> <br> <br><div style="margin: 30px auto; text-align: center;">
-                <div style="background-color: #e38d13; color: white; padding: 10px; border: none; border-radius: 5px; width: 150px; height: 30px; display: flex; justify-content: center; align-items: center; margin: 10px auto;">
-                    <a href="https://mxtoolbox.com/SuperTool.aspx?action=blacklist%3a85.233.205.2&run=toolpage" target="_blank" style="color: white; text-decoration: none; font-weight: bold; font-size: 16px;">
-                        MxToolBox
-                    </a>
-                </div>
-            </div>`;
-    
-  
-  html += `<div style="margin-top: 30px;>`
+    html += ` <br><strong>Checker l'état du relais de messagerie 85.233.205.2 via le lien ci-dessous:</strong> <br> <br><div>
+    <div style="background-color: #e38d13; padding: 10px; border: none; border-radius: 5px; width: auto; display: inline-block; margin: 10px auto;">
+        <a href="https://mxtoolbox.com/SuperTool.aspx?action=blacklist%3a85.233.205.2&run=toolpage" target="_blank" style="color: blue; text-decoration: none; font-weight: bold; font-size: 16px; font-family: Arial, sans-serif;">
+            MXToolBox
+        </a>
+    </div>
+    `;
+
+
+html += `<div style="margin-top: 30px;">`;
+
   html +=  `<div style="color: blue; font-weight: bold;margin-top: 30px;">Support Flexible Workspace Services</div>
     <div style="color: orange;">Orange Cloud for Business</div>
     <div style="color: blue;">helpdesk@neocles.com</div>
@@ -270,11 +269,11 @@ function generateResultsHtml(results) {
   }
   
 
- 
+  cron.schedule('* * * * *', () => {
        checkLinksAndSendEmail();
     }
   );
-
+//});
   app.listen(PORT, () => {
     console.log(`Le serveur est démarré sur le port ${PORT}`)
   })
