@@ -6,7 +6,6 @@ import axios from 'axios';
 import https from 'https';
 import cheerio  from 'cheerio';
 import moment from 'moment/moment.js';
-import cron from 'node-cron'
 import dotenv from 'dotenv';
 dotenv.config();
 const PORT = process.env.PORT || 5000;
@@ -81,8 +80,8 @@ const sendEmail = async (htmlContent) => {
     }
   });
 
- //const recipients = [ 'Support_Mada@neocles.com','lydia.tahinjanahary@orange.com','dimbyfaneva.randriamarovahoaka@orange.com','hedy.andriamahenina@orange.com'  ];
-const recipients = ['zola_andria@outlook.fr'  ];
+const recipients = [ 'Support_Mada@neocles.com','lydia.tahinjanahary@orange.com','dimbyfaneva.randriamarovahoaka@orange.com','hedy.andriamahenina@orange.com'  ];
+//const recipients = ['zola_andria@outlook.fr'  ];
   const ccRecipients = ['zolalaina.andrianantenaina@orange.com'  ];
   const bccRecipients = ['cert.helpdesk@outlook.com'];
     const mailOptions = {
@@ -90,7 +89,7 @@ const recipients = ['zola_andria@outlook.fr'  ];
       to: recipients.join(','),
       cc: ccRecipients.join(','),
       bcc: bccRecipients.join(','),
-    subject: `Vérification quotidienne des URLs et check MxToolbox pour ce  ${moment().format('DD/MM/YYYY')}`,
+    subject: `Check quotidienne des URLs + MxToolbox ce  ${moment().format('DD/MM/YYYY')}`,
     html: htmlContent,
   };
 
