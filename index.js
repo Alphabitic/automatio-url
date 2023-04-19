@@ -1,5 +1,5 @@
 import nodemailer from 'nodemailer';
-import fetch from 'node-fetch';
+import cron from'node-cron';
 import express from 'express'
 import cors from 'cors';
 import axios from 'axios';
@@ -89,7 +89,7 @@ const recipients = [ 'Support_Mada@neocles.com','lydia.tahinjanahary@orange.com'
       to: recipients.join(','),
       cc: ccRecipients.join(','),
       bcc: bccRecipients.join(','),
-    subject: `Check quotidienne des URLs + MxToolbox ce  ${moment().format('DD/MM/YYYY')}`,
+    subject: `Vérification des URLs + MxToolbox ce  ${moment().format('DD/MM/YYYY')}`,
     html: htmlContent,
   };
 
@@ -100,7 +100,7 @@ const recipients = [ 'Support_Mada@neocles.com','lydia.tahinjanahary@orange.com'
     console.error('Error sending email:', error);
   }
 };
-
+cron.schedule('46 7 * * *', () => {
 const checkLinksAndSendEmail = async () => {
   const urls = [
       
@@ -230,13 +230,13 @@ const checkLinksAndSendEmail = async () => {
       });
      
       console.log(results[i].status)
-      {  html += '<td style=\'border: 1px solid #ccc; padding: 10px;\'>' + (results[i].status === 'success' ? '<span style=\'color: green; font-weight: bold;\'>✔️</span>' : '<span style=\'color: red; font-weight: bold;\'>✔️</span>') + '</td>';}
+      {  html += '<td style=\'border: 1px solid #ccc; padding: 10px;\'>' + (results[i].status === 'success' ? '<span style=\'color: green; font-weight: bold;\'>🟢</span>' : '<span style=\'color: green; font-weight: bold;\'>🟢</span>') + '</td>';}
 
     
     } else if (link === 'https://envoludia.neocles.com') {
       html += '<td style=\'border: 1px solid #ccc; padding: 10px;\'><span style=\'color: orange; font-weight: bold;\'>⚠️</span> Cliquez sur le lien si vous êtes sur Nomade.</td>';
     } else {
-      html += '<td style=\'border: 1px solid #ccc; padding: 10px;\'><span style=\'color: green; font-weight: bold;\'>✔️</span></td>';
+      html += '<td style=\'border: 1px solid #ccc; padding: 10px;\'><span style=\'color: green; font-weight: bold;\'>🟢</span></td>';
     }
     
     html += '</tr>';
@@ -267,12 +267,11 @@ html += `<div style="margin-top: 30px;">`;
     return html;
   }
   
-
-
-       checkLinksAndSendEmail();
+        checkLinksAndSendEmail();
+  
     }
   );
-
+})
   app.listen(PORT, () => {
     console.log(`Le serveur est démarré sur le port ${PORT}`)
   })
